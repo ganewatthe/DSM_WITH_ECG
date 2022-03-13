@@ -1,0 +1,5 @@
+*.csh linguist-detectable=false
+*.dat linguist-detectable=false
+*.cmd linguist-detectable=false
+*.do linguist-detectable=false
+*.vams linguist-detectable=true
