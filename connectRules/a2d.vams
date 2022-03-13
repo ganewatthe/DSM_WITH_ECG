@@ -1,0 +1,46 @@
+`timescale 1ns/1ps
+`include "disciplines.vams"
+
+connectmodule a2d(out, in);
+	parameter real vh = 2.7;
+	parameter real vl = 0.5;
+	parameter real c = 100f;
+	parameter real dt = 1n;
+	parameter real dv = 0.2;
+
+	input in;
+	output out;
+	electrical in;
+	reg out;
+	logic out;
+
+	parameter real vlx = vl + dv;
+	parameter real vhx = vh - dv;
+	reg inXregion;
+
+	initial inXregion = 1'b0;
+
+	always @ (above(V(in) - vh)) begin
+		out = 1'b1;
+		inXregion = 1'b0;
+	end
+		
+	always @(above(vl - V(in))) begin
+		out = 1'b0;
+		inXregion = 1'b0;
+	end
+		
+	always @(above(vhx - V(in))) inXregion = 1'b1;
+	always @(above(V(in) - vlx)) inXregion = 1'b1;
+
+	always @(posedge inXregion) begin : XRegionDelay
+		#(dt/1.0n) out = 1'bx;
+		inXregion = 1'b0;
+	end
+
+	always @(negedge inXregion) disable XRegionDelay;
+
+	analog begin
+		I(in) <+ c * ddt(V(in));
+	end
+endmodule

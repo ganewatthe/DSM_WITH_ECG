@@ -1,0 +1,6 @@
+`include "disciplines.vams"
+
+connectrules MyRules;
+	connect a2d merged input electrical, output logic;
+	connect d2a merged input logic, output electrical;
+endconnectrules
