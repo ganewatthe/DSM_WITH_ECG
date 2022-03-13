@@ -1,0 +1,29 @@
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: nonInvertingAmp testbench
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "nonInvertingAmp.vams"
+`include "vsin.vams"
+
+module nonInvertingAmpTb;
+	electrical out, in, gnd;
+	ground gnd;
+
+	vsin #(.freq(100)) sinSource(.p(in),.n(gnd));
+	nonInvertingAmp uut1(.out(out),.in(in),.gnd(gnd));
+endmodule

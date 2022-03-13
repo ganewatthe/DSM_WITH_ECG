@@ -1,0 +1,31 @@
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: idealOpAmp
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+
+module idealOpAmp(out,ip,in);
+	parameter real gain = 1e6;
+
+	input ip,in;
+	output out;
+	electrical out,ip,in;
+
+	analog begin
+		V(out) <+ gain * V(ip,in);
+	end
+endmodule

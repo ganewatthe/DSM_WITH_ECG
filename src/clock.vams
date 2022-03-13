@@ -1,0 +1,38 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: clock
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+
+module clock(clk);
+	parameter freq = 10M;
+	parameter period = 1 / freq * 1e9;	// period in nano seconds
+	parameter duty = 0.5;
+
+	output clk;
+	reg clk;
+	logic clk;
+
+	initial clk = 1'b0;
+	
+	always  begin
+		// #(period/2) clk = ~clk;
+		#(period * duty) clk = 1'b0;
+		#(period * (1 - duty)) clk = 1'b1;
+	end
+endmodule

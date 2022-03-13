@@ -1,0 +1,66 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: SCMOD2_2 testbench
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "vdc.vams"
+`include "vsin.vams"
+`include "singleEndedToDiffConverter.vams"
+`include "clock.vams"
+`include "clockPhaseGen2.vams"
+`include "ctrlSigGen.vams"
+`include "SCMOD2_1.vams"
+`include "SCMOD2_2.vams"
+`include "comparator.vams"
+
+// just for the simulation, assume the ground point is 0 and vdd and vee
+// vcm is gnd in the testbench
+module SCMOD2Tb;
+	electrical vdd,gnd,vee;
+	ground	gnd;
+
+	wire phi1,phi2,ctrl1,ctrl1_bar,ctrl2,ctrl2_bar,s;
+
+	// making the ground reference
+	vdc #(.dc(1.5)) dcl(.p(gnd),.n(vee));	// vdd gnd vee
+	vdc #(.dc(1.5)) dcu(.p(vdd),.n(gnd));
+
+	// voltage signal input
+	vsin #(.freq(100),.ampl(0.1)) sinSource(.p(sin_sig),.n(gnd));
+
+	// single ended to differential signal conversion
+	singleEndedToDiffConverter diff1(.op(ip),.on(in),.ip(sin_sig),.in(gnd),.gnd(gnd));
+
+
+
+	// feedback signal
+	clock #(.freq(1e5),.duty(0.5)) clks(.clk(s));
+
+	// clock generator phi1 and phi2 clock phases
+	clockPhaseGen2 clkGen1(.phi1(phi1),.phi2(phi2));
+
+	// feedback control signal generator 
+	ctrlSigGen ctrlgen1(.ctrl1(ctrl1),.ctrl1_bar(ctrl1_bar),.ctrl2(ctrl2),.ctrl2_bar(ctrl2_bar),.s(s),.phi1(phi1),.phi2(phi2));
+
+
+	// consider gnd to be vee in this module and vcm to be ground
+	// delta sigma modulator - 2
+	// SCMOD2_2 scm1(.op(op),.on(on),.in(in),.vdd(vdd),.gnd(vee),.vcm(gnd),.ctrl1(ctrl1),.phi1(phi1),.phi2(phi2),.ctrl1_bar(ctrl1_bar),.ctrl2(ctrl2),.ctrl2_bar(ctrl2_bar));
+	SCMOD2_2 scm2(.op(op),.on(on),.ip(ip),.in(in),.vdd(vdd),.gnd(vee),.vcm(gnd),.phi1(phi1),.phi2(phi2),.ctrl2(ctrl2),.ctrl2_bar(ctrl2_bar));
+
+endmodule

@@ -1,0 +1,31 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: control signal generator
+// Module Name: capacitor
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+
+module ctrlSigGen(ctrl1,ctrl1_bar,ctrl2,ctrl2_bar,s,phi1,phi2);
+	output ctrl1,ctrl1_bar,ctrl2,ctrl2_bar;
+	input s,phi1,phi2;
+	logic ctrl1,ctrl1_bar,ctrl2,ctrl2_bar, s,phi1,phi2;
+
+	assign ctrl1 = phi1 & s;
+	assign ctrl1_bar = phi1 & ~s;
+	assign ctrl2 = phi2 & s;
+	assign ctrl2_bar = phi2 & ~s;
+endmodule

@@ -1,0 +1,29 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: d-flipflop testbench
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "clock.vams"
+`include "dflipflop.vams"
+
+module dflipflopTb;
+	clock #(.freq(1e5),.duty(0.5)) data(.clk(clk));
+	clock #(.freq(3e4),.duty(0.5)) clksrc(.clk(d));
+
+	dflipflop ff1(.q(q),.d(d),.clkn(clk));
+endmodule

@@ -1,0 +1,43 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: switch
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+
+//voltage controlled switch
+module switch(p,n,s);
+	parameter real ron = 10.0 from (0:inf);
+	parameter real roff = 1000.0M from (ron:inf);
+	parameter real td = 0.0;
+	parameter real tr = 20n;
+	parameter real tf = 20n;
+
+	input s;
+	logic s;
+	electrical p,n;
+
+	real reff;
+
+	analog begin
+		@ (posedge s) reff = ron;
+		@ (negedge s) reff = roff;
+		@ (initial_step) reff = (s? ron : reff);
+
+		I(p,n) <+ V(p,n) / transition(reff, td, tr, tf);
+	end
+endmodule

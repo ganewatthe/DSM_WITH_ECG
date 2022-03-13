@@ -1,0 +1,69 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: SCMOD2_1
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "switch.vams"
+`include "clockPhaseGen2.vams"
+`include "capacitor.vams"
+`include "level1FullyDiffOpAmp.vams"
+
+module SCMOD2_1(op,on,in,vdd,gnd,vcm,ctrl1,phi1,phi2,ctrl1_bar,ctrl2,ctrl2_bar);
+	output op,on;
+	input in,vdd,gnd,vcm,phi1,phi2,ctrl1,ctrl1_bar,ctrl2,ctrl2_bar;
+	electrical op,on,in,vdd,gnd,vcm;
+	logic phi1,phi2,ctrl1,ctrl1_bar,ctrl2,ctrl2_bar;
+
+	// Nodes
+	electrical nc1,nc1_bar,ns,ns_bar,no,no_bar,nc2,nc2_bar;
+	
+
+	// s1 switches
+	switch sw1(.p(in),.n(nc1),.s(phi2));
+	switch sw1_bar(.p(in),.n(nc1_bar),.s(phi1));
+
+	// s2 switches
+	switch sw2(.p(ns),.n(no),.s(phi1));
+	switch sw2_bar(.p(ns_bar),.n(no_bar),.s(phi1));
+
+	// s3 switches
+	switch sw3(.p(ns),.n(vcm),.s(phi2));
+	switch sw3_bar(.p(ns_bar),.n(vcm),.s(phi2));
+
+	// s5 switches
+	switch sw6(.p(nc2),.n(op),.s(phi1));
+	switch sw6_bar(.p(nc2_bar),.n(on),.s(phi1));
+
+	// feedback upper branch
+	switch sw4(.p(vdd),.n(nc1),.s(ctrl1));
+	switch sw4_bar(.p(gnd),.n(nc1),.s(ctrl1_bar));	
+
+	// feedback lower branch
+	switch sw5(.p(vdd),.n(nc1_bar),.s(ctrl2));
+	switch sw5_bar(.p(gnd),.n(nc1_bar),.s(ctrl2_bar));
+
+	// Input sampling capacitors
+	capacitor #(.cap(1p)) cap1(.p(nc1),.n(ns));
+	capacitor #(.cap(1p)) cap1_bar(.p(nc1_bar),.n(ns_bar));
+
+	// Integration Capacitors
+	capacitor #(.cap(12p)) cap2(.p(no),.n(nc2));	
+	capacitor #(.cap(12p)) cap2_bar(.p(no_bar),.n(nc2_bar));
+
+	level1FullyDiffOpAmp opAmp1(.op(nc2),.on(nc2_bar),.ip(no_bar),.in(no),.gnd(vcm));	// ground in amp is vcm here
+endmodule

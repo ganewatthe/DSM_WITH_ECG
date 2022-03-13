@@ -1,0 +1,209 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: sincFilter
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+
+module dec256sinc24b(DATA, data_en, mclk1, reset, mdata1, dec_rate);
+	output 	[15:0] 	DATA;		//filtered output
+	output 			data_en;			//used to clk data out
+	input 			mclk1;			//input modulator clock frequency
+	input 			reset;			//reset
+	input 			mdata1;			//modulator data input
+	input 	[15:0] 	dec_rate;	//decimation rate
+
+	reg 	[15:0] 	DATA;		
+	reg 			data_en;
+
+	logic DATA, data_en, mclk1, reset, mdata1, dec_rate;
+
+	// Data is read on positive clk edge
+
+	reg [36:0] ip_data1;
+	reg [36:0] acc1;
+	reg [36:0] acc2;
+	reg [36:0] acc3;
+	reg [36:0] acc3_d2;
+	reg [36:0] diff1;
+	reg [36:0] diff2;
+	reg [36:0] diff3;
+	reg [36:0] diff1_d;
+	reg [36:0] diff2_d;
+
+	reg [15:0] word_count;
+
+	reg word_clk;
+	reg enable;
+
+	// For simulations, initialize all to 0
+	initial begin
+		ip_data1	=	37'b0;
+		acc1 		= 	37'b0;
+		acc2 		= 	37'b0;
+		acc3 		= 	37'b0;
+		acc3_d2 	= 	37'b0;
+		diff1 		= 	37'b0;
+		diff2 		= 	37'b0;
+		diff3 		= 	37'b0;
+		diff1_d 	= 	37'b0;
+		diff2_d 	= 	37'b0;
+
+		DATA 		= 	16'b0;
+		data_en 	= 	1'b0;
+
+		word_count 	= 	1'b0;
+		word_clk 	= 	1'b0;
+		enable 		= 	1'b0;
+	end
+
+	// Perform the Sinc action
+	always @(mdata1) begin
+		if(mdata1 == 1'b0)
+			ip_data1 <= 37'b0;
+		else begin
+			ip_data1 <= 37'b1;
+		end
+	end
+
+	// Accumulator (Integrator)
+	// Perform the accumulator(IIR) at the speed of the modulator
+	//	z = one sample delay
+	// MCLKOUT = modulators conversion bit rate
+	always @(negedge  mclk1, posedge reset) begin
+		// Initialize acc registers on reset
+		if (reset) begin
+			acc1 <= 37'b0;
+			acc2 <= 37'b0;
+			acc3 <= 37'b0;
+		end
+		else begin
+			// Perform the accumulation process
+			acc1 <= acc1 + ip_data1;
+			acc2 <= acc2 + acc1;
+			acc3 <= acc3 + acc2;
+		end
+	end
+
+	// Decimation stage (MCLKOUT/WORD_CLK)
+	always @(posedge mclk1, posedge reset) begin
+		if (reset) begin
+			word_count <= 16'b0;
+			
+		end
+		else begin
+			if (word_count == dec_rate - 1) begin
+				word_count <= 16'b0;
+			end
+			else begin
+				word_count <= word_count + 16'b1;
+			end
+		end
+	end
+
+	always @(posedge mclk1, posedge reset) begin
+		if (reset) begin
+			word_clk <= 1'b0;
+		end
+		else begin
+			if(word_count == dec_rate/2 - 1)
+				word_clk <= 1'b1;
+			else if (word_count == dec_rate - 1) begin
+				word_clk <= 1'b0;
+			end
+		end
+	end
+
+	// Differentiator (including decimation stage)
+	// Perform the differentiation stage (FIR) at a lower speed
+	// z = one sample delay 
+	// WORD_CLK = output word rate
+	always @(posedge word_clk, posedge reset) begin
+		if (reset) begin
+			acc3_d2 <= 37'b0;
+			diff1_d <= 37'b0;
+			diff2_d <= 37'b0;
+			diff1 	<= 37'b0;
+			diff2 	<= 37'b0;
+			diff3 	<= 37'b0;			
+		end
+		else begin
+			diff1 	<= acc3 - acc3_d2;
+			diff2 	<= diff1 - diff1_d;
+			diff3 	<= diff2 - diff2_d;
+			acc3_d2 <= acc3;
+			diff1_d <= diff1;
+			diff2_d <= diff2;
+		end
+	end
+
+	// Clock the sinc output into an output register
+	// WORD_CLK = output word rate
+
+	always @(posedge word_clk) begin
+		case(dec_rate)
+			16'd32 : begin
+				DATA <= (diff3[15:0] == 16'h8000 ? 16'hFFFF : {diff3[14:0],1'b0});
+			end
+			16'd64 : begin
+				DATA <= (diff3[17:2] == 17'h10000 ? 16'hFFFF : diff3[16:2]);
+			end
+			16'd128 : begin
+				DATA <= (diff3[21:5] == 17'h10000 ? 16'hFFFF : diff3[20:5]);
+			end
+			16'd256 : begin
+				DATA <= (diff3[24:8] == 17'h10000 ? 16'hFFFF : diff3[23:8]);
+			end
+			16'd512 : begin
+				DATA <= (diff3[27:11] == 17'h10000 ? 16'hFFFF : diff3[26:11]);
+			end
+			16'd1024 : begin
+				DATA <= (diff3[30:14] == 17'h10000 ? 16'hFFFF : diff3[29:14]);
+			end
+			16'd2048 : begin
+				DATA <= (diff3[33:17] == 17'h10000 ? 16'hFFFF : diff3[32:17]);
+			end
+			16'd4096 : begin
+				DATA <= (diff3[36:20] == 17'h10000 ? 16'hFFFF : diff3[35:20]);
+			end
+			default : begin
+				DATA <= (diff3[24:8] == 17'h10000 ? 16'hFFFF : diff3[23:8]);
+			end
+		endcase		
+	end
+
+	// Synchronize Data Output
+	always @(posedge mclk1, posedge reset) begin
+		if (reset) begin
+			data_en <= 1'b0;
+			enable 	<= 1'b1;			
+		end
+		else begin
+			if((word_count == dec_rate/2 - 1) && enable) begin
+				data_en <= 1'b1;
+				enable 	<= 1'b0;
+			end
+			else if((word_count == dec_rate - 1) && ~enable) begin
+				data_en <= 1'b0;
+				enable 	<= 1'b1;
+			end
+			else begin
+				data_en <= 1'b0;
+			end
+		end
+	end
+endmodule

@@ -1,0 +1,32 @@
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: nonInvFullyDiffAmp testbench
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "vsin.vams"
+`include "singleEndedToDiffConverter.vams"
+`include "nonInvFullyDiffAmp.vams"
+
+module nonInvFullyDiffAmpTb;
+	electrical op_amp,on_amp,op, on, sin_sig, gnd;
+	ground gnd;
+
+	vsin #(.freq(100)) sinSource(.p(sin_sig),.n(gnd));
+	singleEndedToDiffConverter diffConv1(.op(op),.on(on),.ip(sin_sig),.in(gnd),.gnd(gnd));
+
+	nonInvFullyDiffAmp opAmpDiff1(.op(op_amp),.on(on_amp),.ip(op),.in(on),.gnd(gnd));
+endmodule

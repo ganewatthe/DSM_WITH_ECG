@@ -1,0 +1,32 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: vcvs
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+
+module vcvs(op,on,ip,in);
+	parameter real gain = 1.0;
+
+	input ip,in;
+	output op,on;
+	electrical op,on,ip,in;
+
+	analog begin
+		V(op,on) <+ gain * V(ip,in);
+	end
+endmodule

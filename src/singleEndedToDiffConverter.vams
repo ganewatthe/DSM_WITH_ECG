@@ -1,0 +1,30 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: singleEndedToDiffConverter
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "vcvs.vams"
+
+module singleEndedToDiffConverter(op,on,ip,in,gnd);
+	input in,gnd;
+	output op,on;
+	electrical op,on,ip,in,gnd;
+
+	vcvs #(.gain(0.5)) vp(.op(op),.on(gnd),.ip(ip),.in(in));
+	vcvs #(.gain(0.5)) vn(.op(gnd),.on(on),.ip(ip),.in(in));
+endmodule

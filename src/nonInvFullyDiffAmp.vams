@@ -1,0 +1,55 @@
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: nonInvFullyDiffAmp
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "switch.vams"
+`include "clockPhaseGen2.vams"
+`include "capacitor.vams"
+`include "level1FullyDiffOpAmp.vams"
+
+module nonInvFullyDiffAmp(op,on,ip,in,gnd);
+	output op,on;
+	input ip,in,gnd;
+	electrical op,on,ip,in,gnd;
+
+	// Nodes
+	electrical nc,nc_bar,no,no_bar;
+	wire phi1,phi2;
+
+	clockPhaseGen2 #(.freq(512e3)) clkgen(.phi1(phi1),.phi2(phi2));
+
+	switch sw1(.p(ip),.n(nc),.s(phi1));
+	switch sw1_bar(.p(in),.n(nc_bar),.s(phi1));
+
+	switch sw2(.p(no),.n(on),.s(phi1));
+	switch sw2_bar(.p(no_bar),.n(op),.s(phi1));
+
+	switch sw3(.p(nc),.n(on),.s(phi2));
+	switch sw3_bar(.p(nc_bar),.n(op),.s(phi2));
+	// switch sweq(.p(no),.n(no_bar),.s(phi2));
+
+
+
+	capacitor #(.cap(5p)) cap1(.p(nc),.n(no));
+	capacitor #(.cap(5p)) cap1_bar(.p(nc_bar),.n(no_bar));
+
+	capacitor #(.cap(1p)) cap2(.p(no),.n(on));	
+	capacitor #(.cap(1p)) cap2_bar(.p(no_bar),.n(op));
+
+	level1FullyDiffOpAmp opAmp1(.op(op),.on(on),.ip(no),.in(no_bar),.gnd(gnd));
+endmodule

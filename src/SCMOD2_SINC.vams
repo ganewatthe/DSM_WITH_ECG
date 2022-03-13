@@ -1,0 +1,86 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: SCMOD2_SINC
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "vdc.vams"
+// `include "vsin.vams"
+`include "ecgRead.vams"
+`include "clock.vams"
+`include "clockPhaseGen2.vams"
+`include "ctrlSigGen.vams"
+`include "SCMOD2_1.vams"
+`include "SCMOD2_2.vams"
+`include "comparator.vams"
+`include "dflipflop.vams"
+// `include "dec256sinc24b.vams"
+`include "sinc_filter.vams"
+
+
+// just for the simulation, assume the ground point is 0 and vdd and vee
+// vcm is gnd in the testbench
+module SCMOD2_SINC;
+	electrical vdd,gnd,vee;
+	ground	gnd;
+
+	// for sinc filter
+	reg reset;
+	reg [15:0] dec_rate;
+	wire [23:0] DATA;
+	wire data_en;
+
+	initial begin
+		reset = 1'b0;
+		dec_rate = 16'd4096;
+	end
+
+	// Nodes for SCMOD2
+	electrical scm1_p,scm1_n,scm2_p,scm2_n;
+	wire phi1,phi2,ctrl1,ctrl1_bar,ctrl2,ctrl2_bar,comp_out,s;
+
+	// making the ground reference
+	vdc #(.dc(1.5)) dcl(.p(gnd),.n(vee));	// vdd gnd vee
+	vdc #(.dc(1.5)) dcu(.p(vdd),.n(gnd));
+
+	// ecg signal input
+	// vsin #(.freq(9.8),.ampl(1)) sinSource(.p(signal_in),.n(gnd));
+	clock #(.period(1e9/512)) clk1(.clk(clk));
+	ecgRead(.p(signal_in),.n(gnd),.clk(clk));
+
+	// feedback signal
+	//clock #(.freq(1e5),.duty(0.5)) clks(.clk(s));
+
+	// clock generator phi1 and phi2 clock phases
+	clockPhaseGen2 clkGen1(.phi1(phi1),.phi2(phi2));
+	// feedback control signal generator 
+	ctrlSigGen ctrlgen1(.ctrl1(ctrl1),.ctrl1_bar(ctrl1_bar),.ctrl2(ctrl2),.ctrl2_bar(ctrl2_bar),.s(s),.phi1(phi1),.phi2(phi2));
+
+	// consider gnd to be vee in this module and vcm to be ground
+	// delta sigma modulator - 1
+	SCMOD2_1 scm1(.op(scm1_p),.on(scm1_n),.in(signal_in),.vdd(vdd),.gnd(vee),.vcm(gnd),.ctrl1(ctrl1),.phi1(phi1),.phi2(phi2),.ctrl1_bar(ctrl1_bar),.ctrl2(ctrl2),.ctrl2_bar(ctrl2_bar));
+	SCMOD2_2 scm2(.op(scm2_p),.on(scm2_n),.ip(scm1_p),.in(scm1_n),.vdd(vdd),.gnd(vee),.vcm(gnd),.phi1(phi1),.phi2(phi2),.ctrl2(ctrl2),.ctrl2_bar(ctrl2_bar));
+
+	comparator comp1(.out(comp_out), .p(scm2_p), .n(scm2_n), .latchn(phi2));
+
+	dflipflop dff1(.q(s),.d(comp_out),.clkn(phi1));
+
+
+	// sinc filter
+	// dec256sinc24b sincFilter1(.DATA(DATA), .data_en(data_en), .mclk1(phi1), .reset(reset), .mdata1(s), .dec_rate(dec_rate));
+	sinc_filter sincFilter1(.DATA(DATA), .data_en(data_en), .mclk1(phi1), .reset(reset), .mdata1(s), .dec_rate(dec_rate));
+endmodule

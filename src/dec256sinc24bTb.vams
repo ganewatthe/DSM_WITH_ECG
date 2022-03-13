@@ -1,0 +1,47 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: dec256sinc24b testbench
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "dec256sinc24b.vams"
+`include "clock.vams"
+
+module dec256sinc24bTb;
+	reg mdata1;
+	reg mclk1;
+	reg reset;
+	reg [15:0] dec_rate;
+
+	wire [15:0] DATA;
+
+	initial begin
+		reset = 1'b0;
+		mdata1 = 1'b0;
+		mclk1 = 1'b0;
+		dec_rate = 16'd128;
+	end
+
+	always begin
+		#15	mdata1 = 1'b1;
+		#20	mdata1 = 1'b0;
+	end
+
+	always #5 mclk1 = ~mclk1;
+
+	dec256sinc24b sincFilter1(.DATA(DATA), .data_en(data_en), .mclk1(mclk1), .reset(reset), .mdata1(mdata1), .dec_rate(dec_rate));
+endmodule

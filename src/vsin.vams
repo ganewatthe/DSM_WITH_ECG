@@ -1,0 +1,34 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: vsin
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "constants.vams"
+
+module vsin(p,n);
+	parameter real freq = 1k;
+	parameter real ampl = 1.0;
+	parameter real phase = 0.0;
+
+	output p,n;
+	electrical p,n;
+
+	analog begin
+		V(p,n) <+ ampl * sin(2 * `M_PI * freq * $abstime);
+	end
+endmodule

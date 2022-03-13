@@ -1,0 +1,77 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: SCMOD2_2
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "switch.vams"
+`include "clockPhaseGen2.vams"
+`include "capacitor.vams"
+`include "level1FullyDiffOpAmp.vams"
+
+module SCMOD2_2(op,on,ip,in,vdd,gnd,vcm,phi1,phi2,ctrl2,ctrl2_bar);
+	output op,on;
+	input in,vdd,gnd,vcm,phi1,phi2,ctrl2,ctrl2_bar;
+	electrical op,on,ip,in,vdd,gnd,vcm;
+	logic phi1,phi2,ctrl2,ctrl2_bar;
+
+	// Nodes
+	electrical ns1,ns1_bar,ns2,ns2_bar,ns3,ns3_bar,no,no_bar;
+	
+
+	// s1 switches
+	switch sw1(.p(ip),.n(ns1),.s(phi1));
+	switch sw1_bar(.p(in),.n(ns1_bar),.s(phi1));
+
+	// s2 switches
+	switch sw2(.p(ns2),.n(no),.s(phi2));
+	switch sw2_bar(.p(ns2_bar),.n(no_bar),.s(phi2));
+
+	// feedback upper branch
+	switch sw3(.p(gnd),.n(ns3),.s(ctrl2_bar));
+	switch sw3_bar(.p(vdd),.n(ns3),.s(ctrl2));
+
+	// feedback lower branch
+	switch sw4(.p(vdd),.n(ns3_bar),.s(ctrl2_bar));
+	switch sw4_bar(.p(gnd),.n(ns3_bar),.s(ctrl2));	
+
+	// s5 switches
+	// conntecting vcm may not be essential. check with the simulation
+	switch sw5(.p(ns2),.n(vcm),.s(phi1));
+	switch sw5_bar(.p(ns2_bar),.n(vcm),.s(phi1));
+
+	// s6 switches
+	switch sw6(.p(ns1),.n(ns1_bar),.s(phi2));
+	
+	// s7 switches
+	switch sw7(.p(ns3),.n(ns3_bar),.s(phi1));
+	
+
+	// Signal sampling capacitors
+	capacitor #(.cap(4p)) cap1(.p(ns1),.n(ns2));
+	capacitor #(.cap(4p)) cap1_bar(.p(ns1_bar),.n(ns2_bar));
+
+	// Feedback capacitors
+	capacitor #(.cap(1p)) cap2(.p(ns3),.n(ns2));	
+	capacitor #(.cap(1p)) cap2_bar(.p(ns3_bar),.n(ns2_bar));
+
+	// Integration Capacitors
+	capacitor #(.cap(12p)) cap3(.p(no),.n(op));	
+	capacitor #(.cap(12p)) cap3_bar(.p(no_bar),.n(on));
+
+	level1FullyDiffOpAmp opAmp1(.op(op),.on(on),.ip(no_bar),.in(no),.gnd(vcm));	// ground in amp is vcm here
+endmodule

@@ -1,0 +1,30 @@
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: capacitor
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+`include "disciplines.vams"
+
+module capacitor(p,n);
+	parameter real cap = 1n from [0:inf] exclude 0;	//default capacitor value
+	inout p,n;
+	electrical p,n;
+
+	analog begin
+		I(p,n) <+ cap * ddt(V(p,n));
+	end
+endmodule

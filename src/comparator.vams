@@ -1,0 +1,54 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: comparator latched
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+
+module comparator(out, p, n, latchn);
+	parameter real offset = 0.0;
+	parameter real hyst = 0.0 from [0:inf); // hysteresis voltage
+	
+	input p,n,latchn;
+	output out;
+	electrical p,n;
+	reg out;
+	logic out,latchn;
+
+	parameter real thrlo = offset - 0.5 * hyst;	//lower threshold voltage
+	parameter real thrhi = offset + 0.5 * hyst; //upper threshold voltage
+
+	real comp_out = 0;
+
+	initial begin
+		out = 1'b0;
+	end
+
+	always @(above(V(p,n) - thrhi)) begin
+		comp_out = 1;
+	end
+
+	always @(above(thrlo - V(p,n))) begin
+		comp_out = 0;
+	end
+
+	always @(negedge latchn) begin
+		if (~latchn) begin
+			out = comp_out;
+		end
+	end
+endmodule

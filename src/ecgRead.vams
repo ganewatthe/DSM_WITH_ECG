@@ -1,0 +1,53 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: ecg read
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "constants.vams"
+
+module ecgRead(p,n,clk);
+	output p,n;
+	input clk;
+	electrical p,n;
+	logic clk;
+
+	integer data_file;
+	integer scan_file;
+
+	real captured_data = 0;
+
+	initial begin
+		data_file = $fopen("ECG.dat","r");
+		if(data_file == 0) begin
+			$display("data_file handle was NULL");
+			$finish;
+		end
+	end
+
+	always @(posedge clk)  begin
+		scan_file = $fscanf(data_file, "%f\n",captured_data);
+		if($feof(data_file)) begin
+			$display("File read is over");
+			$finish;
+		end
+	end
+
+	analog begin
+		V(p,n) <+ captured_data;
+	end	
+endmodule

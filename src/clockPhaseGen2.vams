@@ -1,0 +1,48 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company:
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: clockPhaseGen2
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+`include "disciplines.vams"
+
+module clockPhaseGen2(phi1,phi2);
+	parameter real freq = 1e6;		// 1MHz clock frequency
+	parameter real period = 1/freq;
+
+	output phi1,phi2;
+	reg phi1,phi2;
+
+	logic phi1,phi2;
+
+	initial begin
+		phi1 = 0;
+		phi2 = 0;
+	end
+
+	always
+	fork
+		#(0.05*period*1e9) 		phi1 = 1;
+		#(0.45*period*1e9)	 	phi1 = 0;
+
+		#(0.55*period*1e9)		phi2 = 1;
+		#(0.95*period*1e9) 		phi2 = 0;
+
+		#(period*1e9)			phi1 = 0;
+		#(period*1e9)			phi2 = 0;
+	join
+endmodule

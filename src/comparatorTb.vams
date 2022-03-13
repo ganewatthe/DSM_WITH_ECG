@@ -1,0 +1,36 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: comparator latched testbench
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "vsin.vams"
+`include "clock.vams"
+`include "comparator.vams"
+
+module comparatorTb;
+	electrical p,n;
+	ground n;
+	wire s,out;
+
+	vsin #(.freq(1000),.ampl(0.1)) sinSource(.p(p),.n(n));
+
+	clock #(.freq(3e2),.duty(0.5)) clks(.clk(s));
+
+	comparator comp1(.out(out), .p(p), .n(n), .latchn(s));
+
+endmodule

@@ -1,0 +1,45 @@
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: level1OpAmp
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "resistor.vams"
+`include "vcvs.vams"
+`include "constants.vams"
+
+module level1OpAmp(out,ip,in,gnd);
+	parameter real f_u = 50M;	//unity gain frequency
+	parameter real A = 100k;	//voltage gain
+	parameter real res = 1k;	//resistor for pole
+	parameter real f_pole = f_u/A;	//pole at f_u/A
+	parameter real cap = 1/(2 * `M_PI * res * f_pole);	//calculate cap value for pole resistor
+	parameter real r_out = 100;		//output resistance
+	
+	input ip,in;
+	inout gnd;
+	output out;
+
+	electrical ip,in,out,gnd;
+
+	electrical pv,pc,ov;
+
+	vcvs #(.gain(A)) vegain(.op(pv),.on(gnd),.ip(ip),.in(in));
+	resistor #(.res(res)) rp1(.p(pc),.n(pv));	
+	capacitor #(.cap(cap)) cp1(.p(pc),.n(gnd));	
+	vcvs #(.gain(1.0)) vebuffer(.op(ov),.on(gnd),.ip(pc),.in(gnd));
+	resistor #(.res(r_out)) rout(.p(out),.n(ov));
+endmodule

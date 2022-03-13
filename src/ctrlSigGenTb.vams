@@ -1,0 +1,31 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: control signal generator testbench
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "clock.vams"
+`include "clockPhaseGen2.vams"
+`include "ctrlSigGen.vams"
+
+module ctrlSigGenTb;
+	wire phi1,phi2,ctrl1,ctrl1_bar,ctrl2,ctrl2_bar,s;
+
+	clock #(.freq(1e5),.duty(0.75)) clks(.clk(s));
+	clockPhaseGen2 clkGen1(.phi1(phi1),.phi2(phi2));
+	ctrlSigGen ctrlgen1(.ctrl1(ctrl1),.ctrl1_bar(ctrl1_bar),.ctrl2(ctrl2),.ctrl2_bar(ctrl2_bar),.s(s),.phi1(phi1),.phi2(phi2));
+endmodule

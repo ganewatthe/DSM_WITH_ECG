@@ -1,0 +1,44 @@
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: nonInvertingAmp
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "capacitor.vams"
+`include "level1OpAmp.vams"
+`include "clockPhaseGen2.vams"
+`include "switch.vams"
+
+module nonInvertingAmp(out,in,gnd);
+	input in, gnd;
+	output out;
+	electrical out, in, gnd;
+
+	//nodes in the design
+	electrical ns, no;
+	wire phi1, phi2;
+
+	clockPhaseGen2 #(.freq(512e3)) clkPhaseGen(.phi1(phi1),.phi2(phi2));
+	
+	switch sw1(.p(in),.n(ns),.s(phi1));
+	switch sw2(.p(no),.n(out),.s(phi1));
+	switch sw3(.p(ns),.n(gnd),.s(phi2));
+
+	capacitor #(.cap(5p)) cap1(.p(ns),.n(no));
+	capacitor #(.cap(1p)) cap2(.p(no),.n(out));
+
+	level1OpAmp opAmp1(.out(out),.ip(gnd),.in(no),.gnd(gnd));
+endmodule

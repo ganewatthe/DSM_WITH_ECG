@@ -1,0 +1,30 @@
+`timescale 1ns/1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: Chanaka Ashan Ganewattha
+// 
+// Create Date: 12/27/2017:30:52 AM
+// Design Name: DSM_WITH_ECG
+// Module Name: unityGainSampler testbench
+// Project Name: Development of an Analog Front End for Bio Signal Processing
+// Tool Versions: Questa-ADMS
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+`include "disciplines.vams"
+`include "unityGainSampler.vams"
+`include "vsin.vams"
+
+module unityGainSamplerTb;
+	electrical out, in, gnd;
+	ground gnd;
+
+	vsin #(.freq(100)) sinSource(.p(in),.n(gnd));
+	unityGainSampler uut1(.out(out),.in(in),.gnd(gnd));
+endmodule
